@@ -149,7 +149,8 @@ void show_macro_features()
 #endif
 
 #ifdef SRS_PERF_MERGED_READ
-    srs_trace("MR(merged-read): on, @see %s", RTMP_SIG_SRS_ISSUES(241));
+    //srs_trace("MR(merged-read): on, @see %s", RTMP_SIG_SRS_ISSUES(241));
+    srs_trace("MR(merged-read): on");
 #else
     srs_warn("MR(merged-read): off, @see %s", RTMP_SIG_SRS_ISSUES(241));
 #endif
@@ -307,8 +308,8 @@ int main(int argc, char** argv)
     srs_trace(RTMP_SIG_SRS_SERVER", stable is "RTMP_SIG_SRS_PRIMARY);
     srs_trace("license: "RTMP_SIG_SRS_LICENSE", "RTMP_SIG_SRS_COPYRIGHT);
     srs_trace("primary/master: "RTMP_SIG_SRS_PRIMARY);
-    srs_trace("authors: "RTMP_SIG_SRS_AUTHROS);
-    srs_trace("contributors: "SRS_AUTO_CONSTRIBUTORS);
+    //srs_trace("authors: "RTMP_SIG_SRS_AUTHROS);
+    //srs_trace("contributors: "SRS_AUTO_CONSTRIBUTORS);
     srs_trace("uname: "SRS_AUTO_UNAME);
     srs_trace("build: %s, %s", SRS_AUTO_BUILD_DATE, srs_is_little_endian()? "little-endian":"big-endian");
     srs_trace("configure: "SRS_AUTO_USER_CONFIGURE);
