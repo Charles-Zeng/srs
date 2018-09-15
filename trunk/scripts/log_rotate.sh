@@ -1,8 +1,8 @@
 #!/bin/sh
 
-log_path='/home/charles/srs/logs'
+log_path='/root/srs/logs'
 log_file_name='srs.log'
-pid_file='/home/charles/srs/objs/srs.pid'
+pid_file='/root/srs/objs/srs.pid'
 
 log_suffix=`date -d yesterday +%Y%m%d`
 log_file=${log_path}/${log_file_name}
