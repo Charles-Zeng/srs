@@ -51,6 +51,7 @@ using namespace std;
 
 // signal defines.
 #define SIGNAL_RELOAD SIGHUP
+#define SRS_SIGNAL_REOPEN_LOG SIGUSR1
 
 // system interval in ms,
 // all resolution times should be times togother,
@@ -430,7 +431,12 @@ int SrsSignalManager::start()
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     sigaction(SIGINT, &sa, NULL);
-    
+
+    sa.sa_handler = SrsSignalManager::sig_catcher;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SRS_SIGNAL_REOPEN_LOG, &sa, NULL);
+
     sa.sa_handler = SrsSignalManager::sig_catcher;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
@@ -917,7 +923,13 @@ void SrsServer::on_signal(int signo)
         signal_reload = true;
         return;
     }
-    
+
+    if (signo == SRS_SIGNAL_REOPEN_LOG) {
+        _srs_log->reopen();
+        srs_warn("reopen log file");
+        return;
+    }
+
     if (signo == SIGINT || signo == SIGUSR2) {
 #ifdef SRS_AUTO_GPERF_MC
         srs_trace("gmc is on, main cycle will terminate normally.");
