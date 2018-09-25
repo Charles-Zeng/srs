@@ -235,7 +235,7 @@ if [ $SRS_EXPORT_LIBRTMP_PROJECT = NO ]; then
     LINK_OPTIONS="${SrsLinkOptions}${SrsGprofLink}${SrsGperfLink}"
     #
     # srs: srs(simple rtmp server) over st(state-threads)
-    BUILD_KEY="srs" APP_MAIN="srs_main_server" APP_NAME="srs" . auto/apps.sh
+    BUILD_KEY="srs" APP_MAIN="srs_main_server" APP_NAME="rtmp-server" . auto/apps.sh
     # 
     # srs_ingest_hls: to ingest hls stream to srs. 
     BUILD_KEY="srs_ingest_hls" APP_MAIN="srs_main_ingest_hls" APP_NAME="srs_ingest_hls" . auto/apps.sh
