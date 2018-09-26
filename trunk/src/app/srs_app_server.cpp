@@ -37,6 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <openssl/pem.h>
 #include <openssl/bio.h>
 #include <openssl/evp.h>
+#include "srs_app_encrypt.hpp"
 using namespace std;
 
 #include <srs_kernel_log.hpp>
@@ -620,55 +621,7 @@ int SrsServer::initialize(ISrsServerCycle* cycle_handler)
     return ret;
 }
 
-int base64_encode(char *in_str, int in_len, char *out_str)
-{
-    BIO *b64, *bio;
-    BUF_MEM *bptr = NULL;
-    size_t size = 0;
-
-    if (in_str == NULL || out_str == NULL)
-        return -1;
-
-    b64 = BIO_new(BIO_f_base64());
-    bio = BIO_new(BIO_s_mem());
-    bio = BIO_push(b64, bio);
-
-    BIO_write(bio, in_str, in_len);
-    BIO_flush(bio);
-
-    BIO_get_mem_ptr(bio, &bptr);
-    memcpy(out_str, bptr->data, bptr->length);
-    out_str[bptr->length] = '\0';
-    size = bptr->length;
-
-    BIO_free_all(bio);
-    return size;
-}
-
-int base64_decode(char *in_str, int in_len, char *out_str)
-{
-    BIO *b64, *bio;
-    BUF_MEM *bptr = NULL;
-    int counts;
-    int size = 0;
-
-    if (in_str == NULL || out_str == NULL)
-        return -1;
-
-    b64 = BIO_new(BIO_f_base64());
-    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
-
-    bio = BIO_new_mem_buf(in_str, in_len);
-    bio = BIO_push(b64, bio);
-
-    size = BIO_read(bio, out_str, in_len);
-    out_str[size] = '\0';
-
-    BIO_free_all(bio);
-    return size;
-}
-
-time_t ConvertStrtoTime(char * szTime)
+time_t ConvertStrtoTime(const char * szTime)
 {
     tm tm_ = {0};
     time_t t_;
@@ -683,9 +636,8 @@ time_t ConvertStrtoTime(char * szTime)
 //time check function
 void * timeCheck(void* arg)
 {
-    static const char* filePath = "./optional";
-    char instr[128] = {'\0'};
-    char outstr[128] = {'\0'};
+    static const char* filePath = SRS_CONF_DEFAULT_KEYFILE;
+    uint8_t encryptData[128] = {0};
 
     FILE *fp;
     if(NULL == (fp = fopen(filePath, "rb")))
@@ -694,23 +646,24 @@ void * timeCheck(void* arg)
         exit(0);
     }
 
-    if(0 == fread(instr, 1, sizeof(instr), fp))
-    {
+    int dataLen;
+
+    if((dataLen = fread(encryptData, 1, sizeof(encryptData), fp)) == 0) {
         srs_error("error read optional file");
         exit(0);
     }
 
+    fclose(fp);
 
-
-    base64_decode(instr, strlen(instr), outstr);
-    time_t deadTime = ConvertStrtoTime(outstr);
+    const char * strDate = aes_decode_string(encryptData, dataLen);
+    printf("%s\n", strDate);
+    time_t deadTime = ConvertStrtoTime(strDate);
 
     while(1)
     {
         time_t now = st_time();
         if(now > deadTime)
         {
-            printf("%d %d\n", now, deadTime);
             exit(0);
         }
         st_sleep(5);

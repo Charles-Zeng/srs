@@ -46,6 +46,7 @@ using namespace std;
 #include <srs_kernel_file.hpp>
 #include <srs_app_utility.hpp>
 #include <srs_core_performance.hpp>
+#include <srs_app_encrypt.hpp>
 
 using namespace _srs_internal;
 
@@ -456,6 +457,7 @@ SrsConfig::SrsConfig()
     show_help = false;
     show_version = false;
     test_conf = false;
+    generate_keyfile = false;
     
     root = new SrsConfDirective();
     root->conf_line = 0;
@@ -1354,6 +1356,11 @@ int SrsConfig::parse_options(int argc, char** argv)
         fprintf(stderr, "%s\n", RTMP_SIG_SRS_VERSION);
         exit(0);
     }
+
+    if(generate_keyfile) {
+        generic_keyfile();
+        exit(0);
+    }
     
     // first hello message.
     srs_trace(_srs_version);
@@ -1473,6 +1480,21 @@ int SrsConfig::parse_argv(int& i, char** argv)
                 show_help = false;
                 show_version = true;
                 break;
+            case 'g':
+                show_help = false;
+                generate_keyfile = true;
+                if (*p) {
+                    endtime_string = p;
+                    continue;
+                }
+                if (argv[++i]) {
+                    endtime_string = argv[i];
+                    continue;
+                }
+                ret = ERROR_SYSTEM_CONFIG_INVALID;
+                srs_error("option \"-g\" requires parameter, ret=%d", ret);
+                return ret;
+                break;
             case 'c':
                 show_help = false;
                 if (*p) {
@@ -1525,6 +1547,28 @@ void SrsConfig::print_help(char** argv)
         "   %s -t -c "SRS_CONF_DEFAULT_COFNIG_FILE"\n"
         "   %s -c "SRS_CONF_DEFAULT_COFNIG_FILE"\n",
         argv[0], argv[0], argv[0], argv[0]);
+}
+
+void SrsConfig::generic_keyfile()
+{
+    int outLen;
+    const uint8_t * out_buffer = aes_encode_string(endtime_string.c_str(), outLen);
+    FILE *fp;
+    if((fp = fopen(SRS_CONF_DEFAULT_KEYFILE, "wb")) == NULL)
+    {
+        printf("create keyfile:%s failed\n", SRS_CONF_DEFAULT_KEYFILE);
+        return;
+    }
+
+    if(fwrite(out_buffer, 1, outLen, fp) != (size_t)outLen)
+    {
+        printf("write keyfile:%s failed\n", SRS_CONF_DEFAULT_KEYFILE);
+        fclose(fp);
+        return;
+    }
+
+    fclose(fp);
+
 }
 
 int SrsConfig::parse_file(const char* filename)

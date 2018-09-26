@@ -24,6 +24,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef SRS_APP_CONFIG_HPP
 #define SRS_APP_CONFIG_HPP
 
+#define SRS_CONF_DEFAULT_KEYFILE "./optional"
+
 /*
 #include <srs_app_config.hpp>
 */
@@ -198,6 +200,7 @@ private:
     * whether show SRS version and exit.
     */
     bool show_version;
+    bool generate_keyfile;
 // global env variables.
 private:
     /**
@@ -216,6 +219,7 @@ private:
     * if reload, reload the config file.
     */
     std::string config_file;
+    std::string endtime_string;
     /**
     * the directive root.
     */
@@ -305,6 +309,7 @@ private:
     * print help and exit.
     */
     virtual void print_help(char** argv);
+    void generic_keyfile();
 public:
     /**
     * parse the config file, which is specified by cli.
